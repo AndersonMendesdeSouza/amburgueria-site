@@ -15,6 +15,10 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { STORE_HOURS } from "../../utils/storeHours";
+import { OrderController } from "../../controllers/order.controller";
+import { PaymentMethod } from "../../dtos/enums/payment-method.enum";
+import type { PaymentMethodEnum } from "../../dtos/enums/payment-method.enum";
+import type { OrderRequestDto } from "../../dtos/request/order-request.dto";
 
 type CartItem = {
   id: number;
@@ -34,7 +38,7 @@ type CheckoutNavState = {
   total: number;
 };
 
-type PaymentType = "PIX" | "CARD" | "CASH";
+type PaymentType = PaymentMethodEnum;
 
 type SavedAddress = {
   id: string;
@@ -44,6 +48,8 @@ type SavedAddress = {
   street: string;
   number: string;
   district: string;
+  city: string;
+  state: string;
   complement?: string;
   createdAt: number;
 };
@@ -103,6 +109,13 @@ function maskCep(input: string) {
   return `${d.slice(0, 5)}-${d.slice(5)}`;
 }
 
+function maskUf(input: string) {
+  return input
+    .replace(/[^a-zA-Z]/g, "")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 function maskMoneyBR(input: string) {
   const cleaned = input.replace(/[^\d,\.]/g, "").replace(/\./g, ",");
   const parts = cleaned.split(",");
@@ -147,14 +160,17 @@ export default function Checkout() {
   const [street, setStreet] = useState("");
   const [number, setNumber] = useState("");
   const [district, setDistrict] = useState("");
+  const [city, setCity] = useState("");
+  const [uf, setUf] = useState("");
   const [complement, setComplement] = useState("");
-  const [payment, setPayment] = useState<PaymentType>("PIX");
+  const [payment, setPayment] = useState<PaymentType>(PaymentMethod.PIX);
   const [cashChange, setCashChange] = useState("");
   const [needChange, setNeedChange] = useState<boolean | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
-    null
+    null,
   );
   const [useNewAddress, setUseNewAddress] = useState(false);
 
@@ -171,7 +187,7 @@ export default function Checkout() {
   }, []);
 
   useEffect(() => {
-    if (payment !== "CASH") {
+    if (payment !== PaymentMethod.CASH) {
       setNeedChange(null);
       setCashChange("");
     }
@@ -187,13 +203,17 @@ export default function Checkout() {
     : fullName;
   const phoneValue = usingSavedAddress ? selectedAddress?.phone || "" : phone;
   const cepValue = usingSavedAddress ? selectedAddress?.cep || "" : cep;
-  const streetValue = usingSavedAddress ? selectedAddress?.street || "" : street;
+  const streetValue = usingSavedAddress
+    ? selectedAddress?.street || ""
+    : street;
   const numberValue = usingSavedAddress
     ? selectedAddress?.number || ""
     : number;
   const districtValue = usingSavedAddress
     ? selectedAddress?.district || ""
     : district;
+  const cityValue = usingSavedAddress ? selectedAddress?.city || "" : city;
+  const ufValue = usingSavedAddress ? selectedAddress?.state || "" : uf;
   const complementValue = usingSavedAddress
     ? selectedAddress?.complement || ""
     : complement;
@@ -205,14 +225,17 @@ export default function Checkout() {
     onlyDigits(cepValue).length === 8 &&
     streetValue.trim().length > 0 &&
     numberValue.trim().length > 0 &&
-    districtValue.trim().length > 0;
+    districtValue.trim().length > 0 &&
+    cityValue.trim().length > 0 &&
+    ufValue.trim().length === 2;
 
   const step3Done =
-    payment !== "CASH" ||
+    payment !== PaymentMethod.CASH ||
     needChange === false ||
     (needChange === true && cashChange.trim().length > 0);
 
-  const canSend = items.length > 0 && step1Done && step2Done && step3Done;
+  const canSend =
+    items.length > 0 && step1Done && step2Done && step3Done && !isSubmitting;
 
   const storeHours = useMemo<StoreHours>(() => {
     const open = Number((STORE_HOURS as any)?.open);
@@ -225,75 +248,6 @@ export default function Checkout() {
     return isOpenNowByHour(new Date().getHours(), storeHours);
   }, [storeHours]);
 
-  const waLink = useMemo(() => {
-    const phoneDest = "5564999663524";
-    const lines: string[] = [];
-
-    lines.push(`🧾 *Pedido - ${fullNameValue || "-"}*`);
-    lines.push("");
-    lines.push("*Resumo*");
-    items.forEach((it) => {
-      const itemTotal = it.price * it.qty;
-      lines.push(`• ${it.qty}x ${it.name} — ${brl(itemTotal)}`);
-      if (it.subtitle) lines.push(`  ${it.subtitle}`);
-      if (it.note) lines.push(`  ${it.note}`);
-    });
-
-    lines.push("");
-    lines.push(`Subtotal: ${brl(subtotal)}`);
-    lines.push(`Entrega: ${brl(items.length ? deliveryFee : 0)}`);
-    lines.push(`*Total: ${brl(total)}*`);
-
-    if (orderObs.trim()) {
-      lines.push("");
-      lines.push(`Obs: ${orderObs.trim()}`);
-    }
-
-    lines.push("");
-    lines.push("*Seus Dados*");
-    lines.push(`Nome: ${fullNameValue || "-"}`);
-    lines.push(`WhatsApp: ${phoneValue || "-"}`);
-
-    lines.push("");
-    lines.push("*Entrega*");
-    lines.push(`CEP: ${cepValue || "-"}`);
-    lines.push(`Rua: ${streetValue || "-"}, Nº: ${numberValue || "-"}`);
-    lines.push(`Bairro: ${districtValue || "-"}`);
-    if (String(complementValue || "").trim())
-      lines.push(`Compl.: ${String(complementValue).trim()}`);
-
-    lines.push("");
-    lines.push("*Pagamento*");
-    lines.push(
-      payment === "PIX"
-        ? "Pix"
-        : payment === "CARD"
-        ? "Cartão (crédito/débito)"
-        : needChange === true
-        ? `Dinheiro (troco para: ${cashChange.trim() || "-"})`
-        : "Dinheiro (sem troco)"
-    );
-
-    const text = lines.join("\n");
-    return `https://wa.me/${phoneDest}?text=${encodeURIComponent(text)}`;
-  }, [
-    items,
-    subtotal,
-    deliveryFee,
-    total,
-    orderObs,
-    fullNameValue,
-    phoneValue,
-    cepValue,
-    streetValue,
-    numberValue,
-    districtValue,
-    complementValue,
-    payment,
-    cashChange,
-    needChange,
-  ]);
-
   function persistAddressAfterSend() {
     const base = {
       fullName: fullNameValue.trim(),
@@ -302,6 +256,8 @@ export default function Checkout() {
       street: streetValue.trim(),
       number: numberValue.trim(),
       district: districtValue.trim(),
+      city: cityValue.trim(),
+      state: ufValue.trim(),
       complement: String(complementValue || "").trim(),
     };
 
@@ -325,7 +281,7 @@ export default function Checkout() {
       ? savedAddresses.map((a) =>
           a.id === existing.id
             ? { ...a, ...newAddr, id: existing.id, createdAt: Date.now() }
-            : a
+            : a,
         )
       : [newAddr, ...savedAddresses];
 
@@ -351,6 +307,8 @@ export default function Checkout() {
       setStreet(addr.street || "");
       setNumber(addr.number || "");
       setDistrict(addr.district || "");
+      setCity(addr.city || "");
+      setUf(addr.state || "");
       setComplement(addr.complement || "");
     }
   }
@@ -365,6 +323,8 @@ export default function Checkout() {
     setStreet("");
     setNumber("");
     setDistrict("");
+    setCity("");
+    setUf("");
     setComplement("");
   }
 
@@ -375,6 +335,79 @@ export default function Checkout() {
     if (selectedAddressId === id) {
       setSelectedAddressId(null);
       localStorage.removeItem(LS_SELECTED_KEY);
+    }
+  }
+
+  function buildOrderPayload(): OrderRequestDto {
+    const extraInfo = [
+      String(complementValue || "").trim(),
+      orderObs.trim() ? `Obs pedido: ${orderObs.trim()}` : "",
+      payment === PaymentMethod.CASH && needChange === true
+        ? `Troco para: R$ ${cashChange.trim()}`
+        : "",
+    ].filter(Boolean);
+
+    return {
+      paymentMethod: payment,
+      customerName: fullNameValue.trim(),
+      customerPhone: onlyDigits(phoneValue),
+      addressStreet: `${streetValue.trim()}, Nº ${numberValue.trim()}`,
+      addressCityState: `${cityValue.trim()}/${ufValue
+        .trim()
+        .toUpperCase()} - ${districtValue.trim()} - CEP ${cepValue.trim()}`,
+      addressComplement: extraInfo.length ? extraInfo.join(" | ") : undefined,
+      subtotal,
+      deliveryFee: items.length ? deliveryFee : 0,
+      discount: 0,
+      total,
+      items: items.map((item) => ({
+        id: String(item.id),
+        productId: String(item.id),
+        name: item.name,
+        description: item.subtitle,
+        imageUrl: item.image,
+        quantity: item.qty,
+        unitPrice: item.price,
+        totalPrice: item.price * item.qty,
+        observations: item.note,
+      })),
+    };
+  }
+
+  async function handleCreateOrder() {
+    if (!canSend) {
+      alert("Preencha os dados obrigatórios do pedido");
+      return;
+    }
+
+    if (!openNow) {
+      const left = hoursUntilOpen(storeHours);
+      toast.error(
+        `Fechado, abrimos em ${left} ${left === 1 ? "hora" : "horas"}`,
+        { autoClose: 2500 },
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const createdOrder = await OrderController.create(buildOrderPayload());
+
+      persistAddressAfterSend();
+      localStorage.removeItem("food");
+      nav("/order-inform", {
+        state: {
+          orderId: createdOrder.id,
+        },
+      });
+      localStorage.removeItem("food");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Erro ao criar pedido";
+      toast.error(message, { autoClose: 3000 });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -527,7 +560,11 @@ export default function Checkout() {
                       </button>
                     </div>
                     <div className={styles.addressMeta}>
-                      <span>{a.district}</span>
+                      <span>
+                        {[a.district, a.city, a.state]
+                          .filter(Boolean)
+                          .join(" - ")}
+                      </span>
                       <span className={styles.addressCep}>{a.cep}</span>
                     </div>
                     {a.complement ? (
@@ -639,6 +676,30 @@ export default function Checkout() {
                   />
                 </label>
 
+                <div className={styles.row2}>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Cidade</span>
+                    <input
+                      className={styles.input}
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="Sua cidade"
+                      autoComplete="address-level2"
+                    />
+                  </label>
+
+                  <label className={styles.field}>
+                    <span className={styles.label}>UF</span>
+                    <input
+                      className={styles.input}
+                      value={uf}
+                      onChange={(e) => setUf(maskUf(e.target.value))}
+                      placeholder="GO"
+                      autoComplete="address-level1"
+                    />
+                  </label>
+                </div>
+
                 <label className={styles.field}>
                   <span className={styles.label}>Complemento (Opcional)</span>
                   <input
@@ -664,9 +725,9 @@ export default function Checkout() {
             <button
               type="button"
               className={`${styles.payItem} ${
-                payment === "PIX" ? styles.payItemActive : ""
+                payment === PaymentMethod.PIX ? styles.payItemActive : ""
               }`}
-              onClick={() => setPayment("PIX")}
+              onClick={() => setPayment(PaymentMethod.PIX)}
             >
               <div className={styles.payLeft}>
                 <div className={styles.payIcon}>
@@ -679,7 +740,7 @@ export default function Checkout() {
               </div>
               <div
                 className={`${styles.radio} ${
-                  payment === "PIX" ? styles.radioOn : ""
+                  payment === PaymentMethod.PIX ? styles.radioOn : ""
                 }`}
               />
             </button>
@@ -687,22 +748,24 @@ export default function Checkout() {
             <button
               type="button"
               className={`${styles.payItem} ${
-                payment === "CARD" ? styles.payItemActive : ""
+                payment === PaymentMethod.CREDIT_CARD
+                  ? styles.payItemActive
+                  : ""
               }`}
-              onClick={() => setPayment("CARD")}
+              onClick={() => setPayment(PaymentMethod.CREDIT_CARD)}
             >
               <div className={styles.payLeft}>
                 <div className={styles.payIcon}>
                   <Check size={16} />
                 </div>
                 <div className={styles.payTexts}>
-                  <div className={styles.payName}>Cartão</div>
-                  <div className={styles.payDesc}>Crédito ou Débito na entrega</div>
+                  <div className={styles.payName}>Cartão de crédito</div>
+                  <div className={styles.payDesc}>Pagamento na entrega</div>
                 </div>
               </div>
               <div
                 className={`${styles.radio} ${
-                  payment === "CARD" ? styles.radioOn : ""
+                  payment === PaymentMethod.CREDIT_CARD ? styles.radioOn : ""
                 }`}
               />
             </button>
@@ -710,9 +773,32 @@ export default function Checkout() {
             <button
               type="button"
               className={`${styles.payItem} ${
-                payment === "CASH" ? styles.payItemActive : ""
+                payment === PaymentMethod.DEBIT_CARD ? styles.payItemActive : ""
               }`}
-              onClick={() => setPayment("CASH")}
+              onClick={() => setPayment(PaymentMethod.DEBIT_CARD)}
+            >
+              <div className={styles.payLeft}>
+                <div className={styles.payIcon}>
+                  <Check size={16} />
+                </div>
+                <div className={styles.payTexts}>
+                  <div className={styles.payName}>Cartão de débito</div>
+                  <div className={styles.payDesc}>Pagamento na entrega</div>
+                </div>
+              </div>
+              <div
+                className={`${styles.radio} ${
+                  payment === PaymentMethod.DEBIT_CARD ? styles.radioOn : ""
+                }`}
+              />
+            </button>
+
+            <button
+              type="button"
+              className={`${styles.payItem} ${
+                payment === PaymentMethod.CASH ? styles.payItemActive : ""
+              }`}
+              onClick={() => setPayment(PaymentMethod.CASH)}
             >
               <div className={styles.payLeft}>
                 <div className={styles.payIcon}>
@@ -725,12 +811,12 @@ export default function Checkout() {
               </div>
               <div
                 className={`${styles.radio} ${
-                  payment === "CASH" ? styles.radioOn : ""
+                  payment === PaymentMethod.CASH ? styles.radioOn : ""
                 }`}
               />
             </button>
 
-            {payment === "CASH" ? (
+            {payment === PaymentMethod.CASH ? (
               <div className={styles.cashBox}>
                 <div className={styles.payList}>
                   <button
@@ -746,7 +832,9 @@ export default function Checkout() {
                       </div>
                       <div className={styles.payTexts}>
                         <div className={styles.payName}>Sim</div>
-                        <div className={styles.payDesc}>Vou precisar de troco</div>
+                        <div className={styles.payDesc}>
+                          Vou precisar de troco
+                        </div>
                       </div>
                     </div>
                     <div
@@ -789,7 +877,9 @@ export default function Checkout() {
                     <input
                       className={styles.input}
                       value={cashChange}
-                      onChange={(e) => setCashChange(maskMoneyBR(e.target.value))}
+                      onChange={(e) =>
+                        setCashChange(maskMoneyBR(e.target.value))
+                      }
                       placeholder="Ex: 50,00"
                       inputMode="decimal"
                       autoComplete="off"
@@ -814,29 +904,11 @@ export default function Checkout() {
           className={styles.sendBtn}
           type="button"
           disabled={!canSend}
-          onClick={() => {
-            if (!canSend) {
-              alert("Adicione um endereço");
-              return;
-            }
-
-            if (!openNow) {
-              const left = hoursUntilOpen(storeHours);
-              toast.error(
-                `Fechado, abrimos em ${left} ${left === 1 ? "hora" : "horas"}`,
-                { autoClose: 2500 }
-              );
-              return;
-            }
-
-            persistAddressAfterSend();
-            window.open(waLink, "_blank", "noopener,noreferrer");
-            localStorage.removeItem("food");
-          }}
+          onClick={handleCreateOrder}
         >
           <span className={styles.sendLeft}>
             <Send size={18} />
-            <span>Enviar pedido no WhatsApp</span>
+            <span>{isSubmitting ? "Enviando..." : "Enviar pedido"}</span>
           </span>
         </button>
       </div>

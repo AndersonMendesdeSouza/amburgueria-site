@@ -5,6 +5,7 @@ import Main from "./pages/main/Main";
 import Checkout from "./pages/checkout/Checkout";
 import FoodDetails from "./pages/food/FoodDetails";
 import ScrollToTop from "./components/ScrollToTop";
+import OrderInform from "./pages/order-inform";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/foodDetails" element={<FoodDetails />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-inform" element={<OrderInform />} />
       </Routes>
     </>
   );
