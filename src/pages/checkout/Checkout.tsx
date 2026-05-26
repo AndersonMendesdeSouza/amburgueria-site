@@ -14,11 +14,11 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { STORE_HOURS } from "../../utils/storeHours";
 import { OrderController } from "../../controllers/order.controller";
 import { PaymentMethod } from "../../dtos/enums/payment-method.enum";
 import type { PaymentMethodEnum } from "../../dtos/enums/payment-method.enum";
 import type { OrderRequestDto } from "../../dtos/request/order-request.dto";
+import { useStoreStatus } from "../../hooks/useStoreStatus";
 
 type CartItem = {
   id: number;
@@ -56,34 +56,6 @@ type SavedAddress = {
 
 const LS_KEY = "mb_checkout_addresses_v1";
 const LS_SELECTED_KEY = "mb_checkout_selected_address_v1";
-
-type StoreHours = { open: number; close: number };
-
-function isOpenNowByHour(h: number, hours: StoreHours) {
-  const open = Number(hours.open);
-  const close = Number(hours.close);
-  if (open === close) return true;
-  if (open < close) return h >= open && h < close;
-  return h >= open || h < close;
-}
-
-function hoursUntilOpen(hours: StoreHours) {
-  const now = new Date();
-  const h = now.getHours();
-
-  if (isOpenNowByHour(h, hours)) return 0;
-
-  const openHour = Number(hours.open);
-  const open = new Date(now);
-  open.setHours(openHour, 0, 0, 0);
-
-  if (open.getTime() <= now.getTime()) {
-    open.setDate(open.getDate() + 1);
-  }
-
-  const diff = open.getTime() - now.getTime();
-  return Math.max(1, Math.ceil(diff / (1000 * 60 * 60)));
-}
 
 function uid() {
   return `${Date.now()}_${Math.random().toString(16).slice(2)}`;
@@ -167,6 +139,7 @@ export default function Checkout() {
   const [cashChange, setCashChange] = useState("");
   const [needChange, setNeedChange] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const storeStatus = useStoreStatus();
 
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
@@ -237,16 +210,7 @@ export default function Checkout() {
   const canSend =
     items.length > 0 && step1Done && step2Done && step3Done && !isSubmitting;
 
-  const storeHours = useMemo<StoreHours>(() => {
-    const open = Number((STORE_HOURS as any)?.open);
-    const close = Number((STORE_HOURS as any)?.close);
-    if (Number.isFinite(open) && Number.isFinite(close)) return { open, close };
-    return { open: 18, close: 2 };
-  }, []);
-
-  const openNow = useMemo(() => {
-    return isOpenNowByHour(new Date().getHours(), storeHours);
-  }, [storeHours]);
+  const openNow = storeStatus.openNow;
 
   function persistAddressAfterSend() {
     const base = {
@@ -380,8 +344,15 @@ export default function Checkout() {
       return;
     }
 
+    if (storeStatus.loading) {
+      toast.info("Verificando horário de funcionamento...", {
+        autoClose: 1800,
+      });
+      return;
+    }
+
     if (!openNow) {
-      const left = hoursUntilOpen(storeHours);
+      const left = storeStatus.hoursToOpen;
       toast.error(
         `Fechado, abrimos em ${left} ${left === 1 ? "hora" : "horas"}`,
         { autoClose: 2500 },

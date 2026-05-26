@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { STORE_HOURS } from "../../utils/storeHours";
+import { useStoreStatus } from "../../hooks/useStoreStatus";
 
 type CartItem = {
   id: number;
@@ -30,46 +30,12 @@ function makeMergeKey(p: any) {
   return `name:${name || "unknown"}`;
 }
 
-type StoreHours = { open: number; close: number };
-
-function isOpenNowByHour(h: number, hours: StoreHours) {
-  const open = Number(hours.open);
-  const close = Number(hours.close);
-  if (open === close) return true;
-  if (open < close) return h >= open && h < close;
-  return h >= open || h < close;
-}
-
-function hoursUntilOpen(hours: StoreHours) {
-  const now = new Date();
-  const h = now.getHours();
-
-  if (isOpenNowByHour(h, hours)) return 0;
-
-  const openHour = Number(hours.open);
-  const open = new Date(now);
-  open.setHours(openHour, 0, 0, 0);
-
-  if (open.getTime() <= now.getTime()) {
-    open.setDate(open.getDate() + 1);
-  }
-
-  const diff = open.getTime() - now.getTime();
-  return Math.max(1, Math.ceil(diff / (1000 * 60 * 60)));
-}
-
 export default function Cart() {
   const [items, setItems] = useState<CartItem[]>([]);
   const navigation = useNavigate();
   const [orderObs, setOrderObs] = useState("");
   const deliveryFee = 5;
-
-  const storeHours = useMemo<StoreHours>(() => {
-    const open = Number((STORE_HOURS as any)?.open);
-    const close = Number((STORE_HOURS as any)?.close);
-    if (Number.isFinite(open) && Number.isFinite(close)) return { open, close };
-    return { open: 18, close: 2 };
-  }, []);
+  const storeStatus = useStoreStatus();
 
   useEffect(() => {
     const raw = localStorage.getItem("food");
@@ -171,9 +137,7 @@ export default function Cart() {
   const brl = (v: number) =>
     v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const openNow = useMemo(() => {
-    return isOpenNowByHour(new Date().getHours(), storeHours);
-  }, [storeHours]);
+  const openNow = storeStatus.openNow;
 
   return (
     <div className={styles.wrap}>
@@ -301,8 +265,15 @@ export default function Cart() {
             className={styles.checkoutBtn}
             disabled={items.length === 0}
             onClick={() => {
+              if (storeStatus.loading) {
+                toast.info("Verificando horário de funcionamento...", {
+                  autoClose: 1800,
+                });
+                return;
+              }
+
               if (!openNow) {
-                const left = hoursUntilOpen(storeHours);
+                const left = storeStatus.hoursToOpen;
                 toast.error(
                   `Fechado, abrimos em ${left} ${left === 1 ? "hora" : "horas"}`,
                   { autoClose: 2500 }

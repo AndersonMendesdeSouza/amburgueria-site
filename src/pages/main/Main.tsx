@@ -19,7 +19,7 @@ import whatsappred from "../../assets/whatsappred.png";
 import { MainSkeleton } from "../../components/skeletons/main/MainSkeleton";
 import type { FoodResponseDto } from "../../dtos/Food-Response.Dto";
 import { toast, ToastContainer } from "react-toastify";
-import { getStoreStatusNow, STORE_HOURS } from "../../utils/storeHours";
+import { useStoreStatus } from "../../hooks/useStoreStatus";
 
 const productsMock: FoodResponseDto[] = [
   {
@@ -97,34 +97,6 @@ const categoryIcons: Record<string, any> = {
   Sobremesas: IceCream,
 };
 
-type StoreHours = { open: number; close: number };
-
-function isOpenNowByHour(h: number, hours: StoreHours) {
-  const open = Number(hours.open);
-  const close = Number(hours.close);
-  if (open === close) return true;
-  if (open < close) return h >= open && h < close;
-  return h >= open || h < close;
-}
-
-function hoursUntilOpen(hours: StoreHours) {
-  const now = new Date();
-  const h = now.getHours();
-
-  if (isOpenNowByHour(h, hours)) return 0;
-
-  const openHour = Number(hours.open);
-  const open = new Date(now);
-  open.setHours(openHour, 0, 0, 0);
-
-  if (open.getTime() <= now.getTime()) {
-    open.setDate(open.getDate() + 1);
-  }
-
-  const diff = open.getTime() - now.getTime();
-  return Math.max(1, Math.ceil(diff / (1000 * 60 * 60)));
-}
-
 export default function Main() {
   const [category, setCategory] = useState<string | null>(null);
   const navigation = useNavigate();
@@ -132,17 +104,17 @@ export default function Main() {
   const [search, setSearch] = useState("");
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [cartActived, setCartActivedCart] = useState(false);
-
-  const [openNow, setOpenNow] = useState(() => getStoreStatusNow().openNow);
-
-  const storeHours = useMemo<StoreHours>(() => {
-    const open = Number((STORE_HOURS as any)?.open);
-    const close = Number((STORE_HOURS as any)?.close);
-    if (Number.isFinite(open) && Number.isFinite(close)) return { open, close };
-    return { open: 18, close: 2 };
-  }, []);
+  const storeStatus = useStoreStatus();
+  const openNow = storeStatus.openNow;
 
   const handleWatsappClick = () => {
+    if (storeStatus.loading) {
+      toast.info("Verificando horário de funcionamento...", {
+        autoClose: 1800,
+      });
+      return;
+    }
+
     if (openNow) {
       const phone = "5564999663524";
       const text = "Olá! 👋 Vim pelo site e gostaria de fazer um pedido.";
@@ -152,7 +124,7 @@ export default function Main() {
         "noopener,noreferrer"
       );
     } else {
-      const left = hoursUntilOpen(storeHours);
+      const left = storeStatus.hoursToOpen;
       toast.error(
         `Fechado, abrimos em ${left} ${left === 1 ? "hora" : "horas"}`,
         { autoClose: 2500 }
@@ -166,9 +138,14 @@ export default function Main() {
       setCartActivedCart(false);
     }, 7000);
   }
-  const left = hoursUntilOpen(storeHours);
+  const left = storeStatus.hoursToOpen;
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    if (storeStatus.loading) return;
 
     const KEY = "mb_store_toast_shown_v1";
     try {
@@ -177,7 +154,7 @@ export default function Main() {
         if (openNow) {
           toast.success("Estabelecimento aberto", { autoClose: 2500 });
         } else {
-          const left = hoursUntilOpen(storeHours);
+          const left = storeStatus.hoursToOpen;
           toast.error(
             `Fechado, abrimos em ${left} ${left === 1 ? "hora" : "horas"}`,
             { autoClose: 2500 }
@@ -186,19 +163,10 @@ export default function Main() {
         localStorage.setItem(KEY, "1");
       }
     } catch {}
-
-    return () => clearTimeout(t);
-  }, []);
+  }, [openNow, storeStatus.hoursToOpen, storeStatus.loading]);
 
   useEffect(() => {
     searchRef.current?.blur();
-  }, []);
-
-  useEffect(() => {
-    const update = () => setOpenNow(getStoreStatusNow().openNow);
-    update();
-    const id = setInterval(update, 30 * 1000);
-    return () => clearInterval(id);
   }, []);
 
   const categories = useMemo(() => {
