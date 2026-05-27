@@ -1,0 +1,379 @@
+.screen {
+  min-height: 100%;
+  color: #fff;
+  background: #101010;
+}
+
+.content {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 28px;
+}
+
+.title {
+  margin: 0 0 12px;
+  font-size: 27px;
+  font-weight: 900;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  overflow: hidden;
+  margin-bottom: 22px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tabs button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.67);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tabs .activeTab {
+  background: #ffd400;
+  color: #111;
+  font-weight: 900;
+}
+
+.currentOrder,
+.recentList {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  background:
+    radial-gradient(420px 260px at 50% 0%, rgba(255, 255, 255, 0.06), transparent 68%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.currentOrder {
+  padding: 20px;
+}
+
+.orderTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.orderTop h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.orderTop p {
+  display: flex;
+  gap: 7px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.orderTop p strong {
+  color: #ffd400;
+}
+
+.preparing {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border: 1px solid #ffd400;
+  border-radius: 999px;
+  color: #ffd400;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 28px 0 26px;
+  position: relative;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  background: linear-gradient(90deg, #ffd400 0 38%, rgba(255, 255, 255, 0.18) 38%);
+}
+
+.stepDone,
+.stepMuted {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 9px;
+  text-align: center;
+}
+
+.stepDone span,
+.stepMuted span {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.stepDone span {
+  background: #ffd400;
+  color: #111;
+}
+
+.stepMuted span {
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.stepDone strong {
+  color: #ffd400;
+}
+
+.stepMuted strong {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.stepDone strong,
+.stepMuted strong {
+  max-width: 92px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+}
+
+.orderItem {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.orderItem img {
+  width: 70px;
+  height: 70px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.orderItem strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 17px;
+}
+
+.orderItem p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.orderItem > span {
+  align-self: start;
+  padding-top: 9px;
+  font-weight: 800;
+}
+
+.total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  font-size: 20px;
+}
+
+.total strong {
+  font-size: 25px;
+  font-weight: 900;
+}
+
+.trackButton,
+.detailsButton {
+  display: inline-flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.trackButton {
+  border: 0;
+  background: #ffd400;
+  color: #111;
+}
+
+.detailsButton {
+  margin-top: 12px;
+  border: 1px solid rgba(255, 212, 0, 0.64);
+  background: transparent;
+  color: #ffd400;
+}
+
+.recent {
+  margin-top: 28px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.sectionHeader button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 0;
+  background: transparent;
+  color: #ffd400;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.recentList {
+  overflow: hidden;
+}
+
+.recentItem {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.recentItem:last-child {
+  border-bottom: 0;
+}
+
+.recentItem img {
+  width: 88px;
+  height: 82px;
+  border-radius: 9px;
+  object-fit: cover;
+}
+
+.recentInfo {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.recentInfo strong {
+  font-size: 18px;
+}
+
+.recentInfo span {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.recentInfo b {
+  font-size: 16px;
+}
+
+.recentActions {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.delivered {
+  padding: 7px 14px;
+  border: 1px solid rgba(0, 178, 42, 0.55);
+  border-radius: 9px;
+  background: rgba(0, 178, 42, 0.17);
+  color: #20e048;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.delivered::before {
+  content: "✓";
+  margin-right: 6px;
+}
+
+.recentActions button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #ffd400;
+  border-radius: 10px;
+  background: transparent;
+  color: #ffd400;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .content {
+    padding: 22px 8px 24px;
+  }
+
+  .currentOrder {
+    padding: 18px 14px;
+  }
+
+  .orderTop {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .preparing {
+    width: fit-content;
+  }
+
+  .orderItem {
+    grid-template-columns: 62px minmax(0, 1fr) auto;
+  }
+
+  .orderItem img {
+    width: 62px;
+    height: 62px;
+  }
+
+  .recentItem {
+    grid-template-columns: 78px minmax(0, 1fr);
+  }
+
+  .recentActions {
+    grid-column: 2;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

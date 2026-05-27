@@ -1,0 +1,363 @@
+.screen {
+  min-height: 100%;
+  color: #fff;
+  background:
+    radial-gradient(420px 260px at 80% 12%, rgba(255, 255, 255, 0.05), transparent 64%),
+    #101010;
+}
+
+.content {
+  display: flex;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 22px 16px 26px;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.profileCard {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+}
+
+.avatar {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  object-fit: cover;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.34);
+}
+
+.profileInfo {
+  min-width: 0;
+}
+
+.profileInfo h1 {
+  margin: 0 0 5px;
+  overflow-wrap: anywhere;
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1.08;
+}
+
+.profileInfo span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.profileInfo svg {
+  color: #ffd400;
+  fill: none;
+}
+
+.chevron {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.quickCard {
+  display: flex;
+  min-width: 0;
+  min-height: 132px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  background:
+    radial-gradient(160px 100px at 50% 0%, rgba(255, 255, 255, 0.08), transparent 70%),
+    rgba(255, 255, 255, 0.04);
+  color: #fff;
+  cursor: pointer;
+}
+
+.quickCard svg {
+  color: #ffd400;
+  stroke-width: 2.2;
+}
+
+.quickCard strong {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.quickCard span {
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 13px;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.recentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sectionTitle h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.sectionTitle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: #ffd400;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.recentOrder {
+  display: grid;
+  grid-template-columns: 188px minmax(0, 1fr) auto;
+  min-width: 0;
+  overflow: hidden;
+  align-items: stretch;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 15px;
+  background:
+    radial-gradient(260px 150px at 50% 0%, rgba(255, 255, 255, 0.07), transparent 70%),
+    rgba(255, 255, 255, 0.04);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recentOrder > img {
+  width: 100%;
+  height: 164px;
+  object-fit: cover;
+}
+
+.orderInfo {
+  display: flex;
+  min-width: 0;
+  justify-content: center;
+  flex-direction: column;
+  padding: 18px;
+}
+
+.status {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 5px 11px;
+  border: 1px solid rgba(0, 178, 42, 0.55);
+  border-radius: 8px;
+  background: rgba(0, 178, 42, 0.17);
+  color: #20e048;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.status::before {
+  content: "✓";
+  margin-right: 6px;
+}
+
+.orderInfo strong {
+  margin-bottom: 5px;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.orderInfo p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.orderDate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 14px;
+}
+
+.orderRight {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-direction: column;
+  padding: 52px 16px 18px 0;
+}
+
+.orderRight svg {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.orderRight strong {
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.optionsList {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 15px;
+  background:
+    radial-gradient(320px 180px at 50% 0%, rgba(255, 255, 255, 0.07), transparent 70%),
+    rgba(255, 255, 255, 0.04);
+}
+
+.optionItem {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.optionItem:last-child {
+  border-bottom: 0;
+}
+
+.optionIcon {
+  color: #ffd400;
+}
+
+.optionItem span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.optionItem strong {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.optionItem small {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.optionChevron {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 560px) {
+  .content {
+    padding: 20px 8px 24px;
+    gap: 20px;
+  }
+
+  .profileCard {
+    gap: 14px;
+  }
+
+  .avatar {
+    width: 112px;
+    height: 112px;
+  }
+
+  .profileInfo h1 {
+    font-size: 24px;
+  }
+
+  .quickGrid {
+    gap: 9px;
+  }
+
+  .quickCard {
+    min-height: 132px;
+    padding: 13px 8px;
+  }
+
+  .recentOrder {
+    grid-template-columns: 188px minmax(0, 1fr) auto;
+  }
+}
+
+@media (max-width: 430px) {
+  .avatar {
+    width: 92px;
+    height: 92px;
+  }
+
+  .profileInfo h1 {
+    font-size: 21px;
+  }
+
+  .profileInfo span {
+    font-size: 14px;
+  }
+
+  .quickGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recentOrder {
+    grid-template-columns: 132px minmax(0, 1fr) auto;
+  }
+
+  .recentOrder > img {
+    height: 168px;
+  }
+
+  .orderInfo {
+    padding: 14px 10px;
+  }
+
+  .orderInfo strong {
+    font-size: 18px;
+  }
+
+  .orderInfo p {
+    font-size: 14px;
+  }
+
+  .orderRight {
+    padding: 50px 10px 15px 0;
+  }
+
+  .orderRight strong {
+    font-size: 13px;
+  }
+}

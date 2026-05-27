@@ -6,15 +6,14 @@ import {
   PlusCircle,
   CupSoda,
   IceCream,
-  Search,
   ShoppingCart,
   HamburgerIcon,
   Star,
-  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import whatsapp from "../../assets/whatsapp.png";
 import whatsappred from "../../assets/whatsappred.png";
+import { Header } from "../../components/Header/Header";
 
 import { MainSkeleton } from "../../components/skeletons/main/MainSkeleton";
 import type { FoodResponseDto } from "../../dtos/Food-Response.Dto";
@@ -232,51 +231,16 @@ export default function Main() {
           </div>
         )}
 
-        <header className={styles.header}>
-          <div className={styles.headerContent}>
-            <div className={styles.brand}>
-              <img
-                className={styles.brandDot}
-                src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd"
-                alt="Logo"
-              />
-              <span className={styles.brandName}>Mais Burguer</span>
-            </div>
-
-            <button
-              className={styles.headerCart}
-              type="button"
-              onClick={() => navigation("/cart")}
-            >
-              <ShoppingCart size={20} />
-            </button>
-          </div>
-
-          <div className={styles.searchInputWrap}>
-            <Search size={18} />
-            <input
-              ref={searchRef}
-              className={styles.searchInput}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar itens..."
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              inputMode="search"
-            />
-            <button
-              type="button"
-              className={styles.searchClear}
-              onClick={() => {
-                setSearch("");
-                searchRef.current?.blur();
-              }}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </header>
+        <Header
+          search={search}
+          searchRef={searchRef}
+          onCartClick={() => navigation("/cart")}
+          onSearchChange={setSearch}
+          onClearSearch={() => {
+            setSearch("");
+            searchRef.current?.blur();
+          }}
+        />
 
         <div className={styles.whatsappFloat} onClick={handleWatsappClick}>
           {openNow ? (

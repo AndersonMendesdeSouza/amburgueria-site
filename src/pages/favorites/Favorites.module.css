@@ -1,0 +1,278 @@
+.screen {
+  min-height: 100%;
+  color: #fff;
+  background: #101010;
+}
+
+.content {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 28px;
+}
+
+.title {
+  margin: 0 0 14px;
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.searchInputWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  background:
+    radial-gradient(420px 120px at 50% 0%, rgba(255, 255, 255, 0.08), transparent 70%),
+    rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.searchInputWrap input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
+}
+
+.searchInputWrap input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+  margin: 22px 0;
+  overflow-x: auto;
+}
+
+.filterButton,
+.activeFilter {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 19px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filterButton {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.activeFilter {
+  border: 1px solid #ffd400;
+  background: #ffd400;
+  color: #111;
+  font-weight: 900;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.favoriteCard {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  background:
+    radial-gradient(260px 150px at 50% 0%, rgba(255, 255, 255, 0.07), transparent 70%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.imageWrap {
+  position: relative;
+  height: 185px;
+  overflow: hidden;
+}
+
+.imageWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageWrap button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.52);
+  color: #ff2b2b;
+  cursor: pointer;
+}
+
+.cardBody {
+  padding: 14px;
+}
+
+.cardBody h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.cardBody p {
+  min-height: 64px;
+  margin: 0 0 12px;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.cardBottom {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.cardBottom strong {
+  color: #ffd400;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.cardBottom span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 14px;
+}
+
+.cardBottom span svg {
+  color: #ffd400;
+}
+
+.cardBottom button,
+.suggestionCard > button {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border: 0;
+  border-radius: 11px;
+  background: #ffd400;
+  color: #111;
+  cursor: pointer;
+}
+
+.suggestion {
+  margin-top: 28px;
+}
+
+.suggestion h2 {
+  margin: 0 0 14px;
+  font-size: 22px;
+}
+
+.suggestionCard {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+  overflow: hidden;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background:
+    radial-gradient(280px 140px at 50% 0%, rgba(255, 255, 255, 0.07), transparent 70%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.suggestionCard img {
+  width: 150px;
+  height: 120px;
+  object-fit: cover;
+}
+
+.suggestionCard h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.suggestionCard p {
+  margin: 0 0 8px;
+  color: rgba(255, 255, 255, 0.64);
+  line-height: 1.3;
+}
+
+.suggestionCard span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.suggestionCard span strong,
+.suggestionCard span svg {
+  color: #ffd400;
+}
+
+.suggestionCard > button {
+  margin-right: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffd400;
+}
+
+@media (max-width: 520px) {
+  .content {
+    padding: 22px 8px 24px;
+  }
+
+  .grid {
+    gap: 14px;
+  }
+
+  .imageWrap {
+    height: 170px;
+  }
+
+  .cardBody {
+    padding: 12px;
+  }
+
+  .cardBody h2 {
+    font-size: 18px;
+  }
+
+  .cardBody p {
+    font-size: 14px;
+  }
+
+  .suggestionCard {
+    grid-template-columns: 126px minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .suggestionCard img {
+    width: 126px;
+  }
+}
+
+@media (max-width: 390px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

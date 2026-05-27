@@ -1,0 +1,19 @@
+.container {
+  min-height: 100dvh;
+  background-color: #181818;
+}
+
+.main {
+  min-height: 100dvh;
+}
+
+.content {
+  width: 100%;
+  padding: 24px 24px 132px;
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 14px 12px 120px;
+  }
+}
