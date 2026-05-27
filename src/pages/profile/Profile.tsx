@@ -1,5 +1,3 @@
-import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Bell,
   CalendarDays,
@@ -14,7 +12,6 @@ import {
   Ticket,
   User,
 } from "lucide-react";
-import { Header } from "../../components/Header/Header";
 import styles from "./Profile.module.css";
 
 const profileActions = [
