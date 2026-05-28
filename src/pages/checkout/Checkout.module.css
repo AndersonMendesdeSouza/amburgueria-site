@@ -13,7 +13,7 @@
 
 .content {
   padding: 14px 10px 0 10px;
-  padding-bottom: 126px;
+  padding-bottom: 198px;
 }
 
 .header {
@@ -351,24 +351,26 @@
 
 .bottomBar {
   position: fixed;
-  width: 100%;
   left: 0;
   right: 0;
-  bottom: 0;
-  padding: 12px 10px 14px 10px;
+  bottom: 86px;
+  z-index: 95;
+  padding: 12px 18px;
   background: linear-gradient(
     180deg,
-    rgba(26, 26, 26, 0) 0%,
-    rgba(26, 26, 26, 0.78) 26%,
-    rgba(26, 26, 26, 0.92) 100%
+    rgba(24, 24, 24, 0) 0%,
+    rgba(24, 24, 24, 0.78) 26%,
+    #181818 100%
   );
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .totalRow {
+  width: 100%;
+  max-width: 420px;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -388,7 +390,8 @@
 }
 
 .sendBtn {
-  width: 300px;
+  width: 100%;
+  max-width: 420px;
   border: 0;
   border-radius: 18px;
   background: var(--highlight);
@@ -528,12 +531,16 @@
 }
 
 @media (max-width: 600px) {
+  .content {
+    padding-bottom: 182px;
+  }
+
   .bottomBar {
-    align-items: center;
+    bottom: 70px;
+    padding: 10px 18px calc(10px + env(safe-area-inset-bottom));
   }
 
   .sendBtn {
-    width: min(92vw, 420px);
-    width: 300px;
+    max-width: 420px;
   }
 }
