@@ -66,7 +66,6 @@ const settingsOptions = [
 ];
 
 export default function Profile() {
-
   return (
     <div className={styles.screen}>
       <main className={styles.content}>
@@ -78,14 +77,14 @@ export default function Profile() {
           />
 
           <div className={styles.profileInfo}>
-            <h1>Anderson Mendes</h1>
+            <h1 style={{ fontSize: "25px", fontWeight: "900" }}>
+              Anderson Mendes
+            </h1>
             <span>
               <Star size={14} />
               Cliente desde 2026
             </span>
           </div>
-
-          <ChevronRight className={styles.chevron} size={24} />
         </section>
 
         <section className={styles.quickGrid} aria-label="Atalhos do perfil">

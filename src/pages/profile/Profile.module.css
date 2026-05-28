@@ -1,9 +1,7 @@
 .screen {
   min-height: 100%;
   color: #fff;
-  background:
-    radial-gradient(420px 260px at 80% 12%, rgba(255, 255, 255, 0.05), transparent 64%),
-    #101010;
+
 }
 
 .content {
@@ -18,14 +16,16 @@
 
 .profileCard {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+    display: flex;
+    flex-direction: column;
   align-items: center;
   gap: 18px;
+  margin-top: 50px;
 }
 
 .avatar {
-  width: 112px;
-  height: 112px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.14);
   object-fit: cover;
@@ -34,6 +34,10 @@
 
 .profileInfo {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
 }
 
 .profileInfo h1 {
@@ -290,6 +294,9 @@
 
   .profileCard {
     gap: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .avatar {
