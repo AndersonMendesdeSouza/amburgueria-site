@@ -1,7 +1,7 @@
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ||
-  "http://localhost:3000";
-// "https://amburgueria-api-production.up.railway.app";
+  // "http://localhost:3000";
+"https://amburgueria-api.onrender.com";
 
 type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
