@@ -87,6 +87,8 @@ export default function Register() {
       };
       const data = await UserService.login(payloadLogin);
       contextLogin(data.token);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userId", data.user.id);
       navigate("/main");
     } catch (error) {
       console.error(error);
