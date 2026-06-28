@@ -2,6 +2,11 @@ import { useEffect, useState, type CSSProperties, type RefObject } from "react";
 import { Search, ShoppingCart, X } from "lucide-react";
 import styles from "./Header.module.css";
 import { useNavigate } from "react-router-dom";
+import {
+  CART_STORAGE_KEY,
+  CART_UPDATED_EVENT,
+  getCartQuantity,
+} from "../../utils/cartStorage";
 
 type HeaderProps = {
   search?: string;
@@ -187,7 +192,7 @@ function useDesktopHeader() {
 export function Header({
   search = "",
   searchRef,
-  cartCount = 2,
+  cartCount,
   searchPlaceholder = "Buscar itens...",
   showSearch = true,
   onCartClick,
@@ -196,6 +201,31 @@ export function Header({
 }: HeaderProps) {
   const isDesktopHeader = useDesktopHeader();
   const navigate = useNavigate();
+  const [storedCartCount, setStoredCartCount] = useState(getCartQuantity);
+  const badgeCount = cartCount ?? storedCartCount;
+  const [isLogin, setIsLogin] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsLogin(true);
+    }
+    const updateCartCount = () => setStoredCartCount(getCartQuantity());
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === CART_STORAGE_KEY) updateCartCount();
+    };
+
+    updateCartCount();
+    window.addEventListener(CART_UPDATED_EVENT, updateCartCount);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", updateCartCount);
+
+    return () => {
+      window.removeEventListener(CART_UPDATED_EVENT, updateCartCount);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", updateCartCount);
+    };
+  }, []);
 
   return (
     <header className={styles.header} style={headerStyle}>
@@ -215,27 +245,29 @@ export function Header({
           </span>
         </div>
 
-        <div
-          className={styles.authActions}
-          style={isDesktopHeader ? desktopAuthActionsStyle : authActionsStyle}
-        >
-          <button
-            type="button"
-            className={`${styles.authButton} ${styles.authPrimary}`}
-            style={authPrimaryStyle}
-            onClick={() => navigate("/login")}
+        {!isLogin && (
+          <div
+            className={styles.authActions}
+            style={isDesktopHeader ? desktopAuthActionsStyle : authActionsStyle}
           >
-            Entrar
-          </button>
-          <button
-            type="button"
-            className={styles.authButton}
-            style={authButtonStyle}
-            onClick={() => navigate("/register")}
-          >
-            Criar conta
-          </button>
-        </div>
+            <button
+              type="button"
+              className={`${styles.authButton} ${styles.authPrimary}`}
+              style={authPrimaryStyle}
+              onClick={() => navigate("/login")}
+            >
+              Entrar
+            </button>
+            <button
+              type="button"
+              className={styles.authButton}
+              style={authButtonStyle}
+              onClick={() => navigate("/register")}
+            >
+              Criar conta
+            </button>
+          </div>
+        )}
 
         <button
           className={styles.cartButton}
@@ -245,9 +277,9 @@ export function Header({
           aria-label="Abrir carrinho"
         >
           <ShoppingCart size={22} />
-          {cartCount > 0 && (
+          {badgeCount > 0 && (
             <span className={styles.cartBadge} style={cartBadgeStyle}>
-              {cartCount}
+              {badgeCount}
             </span>
           )}
         </button>

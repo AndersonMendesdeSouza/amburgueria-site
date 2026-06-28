@@ -14,7 +14,9 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { useStoreStatus } from "../../hooks/useStoreStatus";
 import {
+  CART_STORAGE_KEY,
   makeCartMergeKey,
+  notifyCartUpdated,
   type StoredCartItem,
 } from "../../utils/cartStorage";
 
@@ -37,7 +39,7 @@ type CartCssVars = CSSProperties & {
 };
 
 function parseStoredCartItems(): CartItem[] {
-  const raw = localStorage.getItem("food");
+  const raw = localStorage.getItem(CART_STORAGE_KEY);
   if (!raw) return [];
 
   try {
@@ -103,8 +105,9 @@ export default function Cart() {
 
   const persist = (next: CartItem[]) => {
     setItems(next);
-    if (!next.length) localStorage.removeItem("food");
-    else localStorage.setItem("food", JSON.stringify(next));
+    if (!next.length) localStorage.removeItem(CART_STORAGE_KEY);
+    else localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(next));
+    notifyCartUpdated();
   };
 
   const getKeyFromItem = (it: CartItem) => {

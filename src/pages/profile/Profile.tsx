@@ -13,6 +13,11 @@ import {
   User,
 } from "lucide-react";
 import styles from "./Profile.module.css";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserService } from "../../service/user.service";
+import type { UserResponseDto } from "../../dtos/response/user-response.dto";
+import { useAuth } from "../../contexts/AuthContext";
 
 const profileActions = [
   {
@@ -37,35 +42,126 @@ const profileActions = [
   },
 ];
 
-const settingsOptions = [
-  {
-    title: "Editar perfil",
-    subtitle: "Nome, e-mail e telefone",
-    icon: User,
-  },
-  {
-    title: "Notificações",
-    subtitle: "Preferências de alertas",
-    icon: Bell,
-  },
-  {
-    title: "Ajuda e suporte",
-    subtitle: "Fale conosco",
-    icon: CircleHelp,
-  },
-  {
-    title: "Configurações",
-    subtitle: "Privacidade e segurança",
-    icon: Settings,
-  },
-  {
-    title: "Sair da conta",
-    subtitle: "Encerrar sessão",
-    icon: LogOut,
-  },
-];
+function formatRegistrationDate(date?: string) {
+  if (!date) return "2026";
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "2026";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(parsedDate);
+}
 
 export default function Profile() {
+  const [user, setUser] = useState<UserResponseDto>();
+  const [activeOption, setActiveOption] = useState<string | null>(null);
+  const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
+  const hasLoadedUser = useRef(false);
+  const optionEffectTimeoutRef = useRef<number | null>(null);
+  const optionActionTimeoutRef = useRef<number | null>(null);
+  const { logout: contextLogout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (hasLoadedUser.current) {
+      return;
+    }
+
+    hasLoadedUser.current = true;
+    const data = localStorage.getItem("userId");
+    alert(JSON.stringify(data));
+    const loadUser = async () => {
+      try {
+        const data = await UserService.findOne(
+          "94249467-68d4-4730-bfb8-10a4e1cc4d38",
+        );
+        setUser(data);
+      } catch (error) {
+        alert("Erro ao buscar usuário");
+        console.error(error);
+      }
+    };
+    loadUser();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (optionEffectTimeoutRef.current) {
+        window.clearTimeout(optionEffectTimeoutRef.current);
+      }
+
+      if (optionActionTimeoutRef.current) {
+        window.clearTimeout(optionActionTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function handleOptionClick(title: string, onClick: () => void) {
+    if (optionEffectTimeoutRef.current) {
+      window.clearTimeout(optionEffectTimeoutRef.current);
+    }
+
+    if (optionActionTimeoutRef.current) {
+      window.clearTimeout(optionActionTimeoutRef.current);
+    }
+
+    setActiveOption(title);
+
+    optionEffectTimeoutRef.current = window.setTimeout(() => {
+      setActiveOption(null);
+      optionEffectTimeoutRef.current = null;
+    }, 260);
+
+    optionActionTimeoutRef.current = window.setTimeout(() => {
+      onClick();
+      optionActionTimeoutRef.current = null;
+    }, 120);
+  }
+
+  function confirmLogout() {
+    contextLogout();
+    setShowLogoutModal(false);
+  }
+
+  const settingsOptions = [
+    {
+      title: "Editar perfil",
+      subtitle: "Nome, e-mail e telefone",
+      icon: User,
+      onClick: () => alert("Edit"),
+    },
+    {
+      title: "Notificações",
+      subtitle: "Preferências de alertas",
+      icon: Bell,
+      onClick: () => alert("Not"),
+    },
+    {
+      title: "Ajuda e suporte",
+      subtitle: "Fale conosco",
+      icon: CircleHelp,
+      onClick: () => alert("Help"),
+    },
+    {
+      title: "Configurações",
+      subtitle: "Privacidade e segurança",
+      icon: Settings,
+      onClick: () => alert("config"),
+    },
+    {
+      title: "Sair da conta",
+      subtitle: "Encerrar sessão",
+      icon: LogOut,
+      onClick: () => setShowLogoutModal(true),
+    },
+  ];
+
   return (
     <div className={styles.screen}>
       <main className={styles.content}>
@@ -73,16 +169,16 @@ export default function Profile() {
           <img
             className={styles.avatar}
             src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=240&q=80"
-            alt="Anderson Mendes"
+            alt={user?.name ?? "Cliente não definido"}
           />
 
           <div className={styles.profileInfo}>
             <h1 style={{ fontSize: "25px", fontWeight: "900" }}>
-              Anderson Mendes
+              {user?.name ?? "Cliente não definido"}
             </h1>
             <span>
               <Star size={14} />
-              Cliente desde 2026
+              Cliente desde {formatRegistrationDate(user?.dateRegistration)}
             </span>
           </div>
         </section>
@@ -145,8 +241,11 @@ export default function Profile() {
             return (
               <button
                 key={item.title}
-                className={styles.optionItem}
+                className={`${styles.optionItem} ${
+                  activeOption === item.title ? styles.optionItemActive : ""
+                }`}
                 type="button"
+                onClick={() => handleOptionClick(item.title, item.onClick)}
               >
                 <Icon className={styles.optionIcon} size={26} />
                 <span>
@@ -159,6 +258,45 @@ export default function Profile() {
           })}
         </section>
       </main>
+
+      {showLogoutModal && (
+        <div
+          className={styles.modalOverlay}
+          role="presentation"
+          onClick={() => setShowLogoutModal(false)}
+        >
+          <section
+            className={styles.logoutModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="logout-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <span className={styles.modalIcon} aria-hidden="true">
+              <LogOut size={26} />
+            </span>
+            <h2 id="logout-modal-title">Deseja sair?</h2>
+            <p>Sua sessão será encerrada e você voltará para o login.</p>
+
+            <div className={styles.modalActions}>
+              <button
+                className={styles.modalCancel}
+                type="button"
+                onClick={() => setShowLogoutModal(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className={styles.modalConfirm}
+                type="button"
+                onClick={confirmLogout}
+              >
+                Sair
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

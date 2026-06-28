@@ -20,6 +20,10 @@ import { PaymentMethod } from "../../dtos/enums/payment-method.enum";
 import type { PaymentMethodEnum } from "../../dtos/enums/payment-method.enum";
 import type { OrderRequestDto } from "../../dtos/request/order-request.dto";
 import { useStoreStatus } from "../../hooks/useStoreStatus";
+import {
+  CART_STORAGE_KEY,
+  notifyCartUpdated,
+} from "../../utils/cartStorage";
 
 type CartItem = {
   id: string;
@@ -377,13 +381,14 @@ export default function Checkout() {
       const createdOrder = await OrderController.create(buildOrderPayload());
 
       persistAddressAfterSend();
-      localStorage.removeItem("food");
+      localStorage.removeItem(CART_STORAGE_KEY);
+      notifyCartUpdated();
       nav("/order-inform", {
         state: {
           orderId: createdOrder.id,
         },
       });
-      localStorage.removeItem("food");
+      localStorage.removeItem(CART_STORAGE_KEY);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Erro ao criar pedido";

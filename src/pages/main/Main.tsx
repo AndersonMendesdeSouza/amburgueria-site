@@ -96,7 +96,7 @@ export default function Main() {
         localStorage.setItem(KEY, "1");
       }
     } catch {
-      console.log("error")
+      console.log("error");
     }
   }, [openNow, storeStatus.hoursToOpen, storeStatus.loading]);
 

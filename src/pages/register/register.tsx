@@ -1,7 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import {
   ArrowLeft,
-  ArrowRight,
   Eye,
   EyeOff,
   LockKeyhole,
@@ -20,6 +19,8 @@ import {
   getRequestErrorMessage,
   isEmailAlreadyRegisteredError,
 } from "../../utils/getRequestErrorMessage";
+import type { LoginRequestDto } from "../../dtos/request/login-request.dto";
+import { useAuth } from "../../contexts/AuthContext";
 
 type RegisterCssVars = CSSProperties & {
   "--bg-primary": string;
@@ -49,8 +50,9 @@ export default function Register() {
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<RegisterErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const navigate = useNavigate();
-
+  const { login: contextLogin } = useAuth();
   function validateFields(): boolean {
     const nextErrors: RegisterErrors = {};
 
@@ -64,6 +66,7 @@ export default function Register() {
   }
 
   async function newUser(): Promise<void> {
+    if (isSubmitting) return;
     if (!validateFields()) return;
 
     const payload: UserRequestDto = {
@@ -74,8 +77,16 @@ export default function Register() {
       password,
     };
 
+    setIsSubmitting(true);
+
     try {
       await UserService.register(payload);
+      const payloadLogin: LoginRequestDto = {
+        email: email.trim(),
+        password,
+      };
+      const data = await UserService.login(payloadLogin);
+      contextLogin(data.token);
       navigate("/main");
     } catch (error) {
       console.error(error);
@@ -110,6 +121,8 @@ export default function Register() {
           theme: "dark",
         },
       );
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -273,9 +286,17 @@ export default function Register() {
               )}
             </label>
 
-            <button className={styles.submitButton} type="submit">
-              <span>Cadastrar</span>
-              <ArrowRight size={22} aria-hidden="true" />
+            <button
+              className={styles.submitButton}
+              type="submit"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? (
+                <span className={styles.loadingSpinner} aria-hidden="true" />
+              ) : (
+                <span>Cadastrar</span>
+              )}
             </button>
           </form>
 

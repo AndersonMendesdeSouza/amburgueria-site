@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from "react";
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import Colors from "../../themes/Colors";
@@ -7,6 +7,7 @@ import styles from "./login.module.css";
 import { UserService } from "../../service/user.service";
 import type { LoginRequestDto } from "../../dtos/request/login-request.dto";
 import { getRequestErrorMessage } from "../../utils/getRequestErrorMessage";
+import { useAuth } from "../../contexts/AuthContext";
 
 type LoginCssVars = CSSProperties & {
   "--bg-primary": string;
@@ -23,6 +24,8 @@ export default function Login() {
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<LoginErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { login: contextLogin } = useAuth();
 
   const navigate = useNavigate();
 
@@ -37,6 +40,7 @@ export default function Login() {
   }
 
   async function login(): Promise<void> {
+    if (isSubmitting) return;
     if (!validateFields()) return;
 
     const payload: LoginRequestDto = {
@@ -44,9 +48,13 @@ export default function Login() {
       password,
     };
 
+    setIsSubmitting(true);
+
     try {
       const response = await UserService.login(payload);
+      contextLogin(response.token);
       localStorage.setItem("token", response.token);
+      localStorage.setItem("userId", response.user.id);
       navigate("/main");
     } catch (error) {
       console.error(error);
@@ -66,6 +74,8 @@ export default function Login() {
           theme: "dark",
         },
       );
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -172,9 +182,19 @@ export default function Login() {
               Esqueceu a senha?
             </Link>
 
-            <button className={styles.submitButton} type="submit">
-              <span>Entrar</span>
-              <ArrowRight size={22} aria-hidden="true" />
+            <button
+              className={styles.submitButton}
+              type="submit"
+              disabled={isSubmitting}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? (
+                <span className={styles.loadingSpinner} aria-hidden="true" />
+              ) : (
+                <>
+                  <span>Entrar</span>
+                </>
+              )}
             </button>
           </form>
 

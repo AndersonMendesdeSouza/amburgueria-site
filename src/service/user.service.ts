@@ -14,4 +14,9 @@ export const UserService = {
     const response = await api.post<UserResponseDto>("/users", dto);
     return response.data;
   },
+
+  findOne: async (id: string): Promise<UserResponseDto> => {
+    const response = await api.get<UserResponseDto>(`/users/${id}`);
+    return response.data;
+  },
 };

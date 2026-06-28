@@ -6,4 +6,5 @@ export interface UserResponseDto {
   role: UserRole;
   name: string;
   email: string;
+  dateRegistration: string;
 }

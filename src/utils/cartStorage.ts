@@ -12,6 +12,9 @@ export type StoredCartItem = {
   [key: string]: unknown;
 };
 
+export const CART_STORAGE_KEY = "food";
+export const CART_UPDATED_EVENT = "cart-updated";
+
 export function makeCartMergeKey(item: StoredCartItem) {
   const id = String(item.id ?? "").trim();
   if (id) return `id:${id}`;
@@ -20,22 +23,43 @@ export function makeCartMergeKey(item: StoredCartItem) {
   return `name:${name || "unknown"}`;
 }
 
+function parseCartItems(): StoredCartItem[] {
+  if (typeof localStorage === "undefined") return [];
+
+  const raw = localStorage.getItem(CART_STORAGE_KEY);
+  if (!raw) return [];
+
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    const values = Array.isArray(parsed) ? parsed : [parsed];
+    return values.filter(
+      (value): value is StoredCartItem =>
+        Boolean(value) && typeof value === "object",
+    );
+  } catch {
+    return [];
+  }
+}
+
+export function getCartQuantity() {
+  return parseCartItems().reduce((total, item) => {
+    const quantity = Number(item.qty ?? item.quantity ?? 1);
+    const safeQuantity =
+      Number.isFinite(quantity) && quantity > 0 ? quantity : 1;
+
+    return total + safeQuantity;
+  }, 0);
+}
+
+export function notifyCartUpdated() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(CART_UPDATED_EVENT));
+}
+
 export function addCart(item: StoredCartItem | null) {
   if (!item) return;
 
-  const raw = localStorage.getItem("food");
-  let items: StoredCartItem[] = [];
-
-  if (raw) {
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      items = Array.isArray(parsed)
-        ? parsed.filter(Boolean)
-        : [parsed].filter(Boolean);
-    } catch {
-      items = [];
-    }
-  }
+  const items = parseCartItems();
 
   const qtyToAddRaw = Number(item.qty ?? item.quantity ?? 1);
   const qtyToAdd =
@@ -64,5 +88,6 @@ export function addCart(item: StoredCartItem | null) {
     });
   }
 
-  localStorage.setItem("food", JSON.stringify(items));
+  localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+  notifyCartUpdated();
 }

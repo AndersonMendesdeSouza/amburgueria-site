@@ -241,6 +241,7 @@
 }
 
 .optionItem {
+  position: relative;
   display: grid;
   width: 100%;
   grid-template-columns: 38px minmax(0, 1fr) auto;
@@ -253,6 +254,39 @@
   color: #fff;
   text-align: left;
   cursor: pointer;
+  overflow: hidden;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.optionItem::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 212, 0, 0.16), transparent);
+  opacity: 0;
+  transform: translateX(-35%);
+  pointer-events: none;
+}
+
+.optionItem:hover,
+.optionItemActive {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.optionItem:active {
+  transform: scale(0.985);
+}
+
+.optionItemActive {
+  box-shadow: inset 3px 0 0 #ffd400;
+  animation: optionTap 260ms ease;
+}
+
+.optionItemActive::after {
+  animation: optionShine 260ms ease;
 }
 
 .optionItem:last-child {
@@ -284,6 +318,149 @@
 
 .optionChevron {
   color: rgba(255, 255, 255, 0.7);
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(5px);
+  animation: overlayIn 160ms ease;
+}
+
+.logoutModal {
+  width: min(100%, 360px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 20px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background:
+    radial-gradient(260px 140px at 50% 0%, rgba(255, 212, 0, 0.13), transparent 72%),
+    #171717;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+  text-align: center;
+  animation: modalIn 180ms ease;
+}
+
+.modalIcon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 212, 0, 0.14);
+  color: #ffd400;
+}
+
+.logoutModal h2 {
+  margin: 2px 0 0;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.logoutModal p {
+  max-width: 270px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.modalActions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.modalActions button {
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    opacity 140ms ease,
+    background 140ms ease;
+}
+
+.modalActions button:active {
+  transform: scale(0.98);
+}
+
+.modalCancel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.modalConfirm {
+  border: 0;
+  background: #ffd400;
+  color: #111;
+}
+
+.modalCancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modalConfirm:hover {
+  opacity: 0.9;
+}
+
+@keyframes optionTap {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(0.985);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes optionShine {
+  0% {
+    opacity: 0;
+    transform: translateX(-35%);
+  }
+
+  35% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(35%);
+  }
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
 }
 
 @media (max-width: 560px) {
