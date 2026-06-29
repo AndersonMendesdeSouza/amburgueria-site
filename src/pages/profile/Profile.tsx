@@ -60,7 +60,6 @@ function formatRegistrationDate(date?: string) {
 
 export default function Profile() {
   const [user, setUser] = useState<UserResponseDto>();
-  const [userId, setUserId] = useState<any>("");
   const [activeOption, setActiveOption] = useState<string | null>(null);
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
   const hasLoadedUser = useRef(false);
@@ -75,11 +74,16 @@ export default function Profile() {
     }
 
     hasLoadedUser.current = true;
-    const data = localStorage.getItem("userId");
-    setUserId(data);
+    const storedUserId = localStorage.getItem("userId");
+
+    if (!storedUserId) {
+      navigate("/login");
+      return;
+    }
+
     const loadUser = async () => {
       try {
-        const data = await UserService.findOne(userId);
+        const data = await UserService.findOne(storedUserId);
         setUser(data);
       } catch (error) {
         alert("Erro ao buscar usuário");
@@ -87,7 +91,7 @@ export default function Profile() {
       }
     };
     loadUser();
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     return () => {
