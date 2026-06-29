@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Banknote,
@@ -23,6 +23,7 @@ import { OrderController } from "../controllers/order.controller";
 import type { PaymentMethodEnum } from "../dtos/enums/payment-method.enum";
 import type { OrderResponseDto } from "../dtos/response/order-response.dto";
 import { formatOrderCode } from "../utils/formatOrderCode";
+import { playNotificationSound } from "../utils/notificationSound";
 
 type CartItem = {
   id: string;
@@ -135,17 +136,33 @@ export default function OrderInform() {
   const isMobile = useIsMobile();
   const state = (location.state || {}) as OrderState;
   const [order, setOrder] = useState<OrderResponseDto | null>(null);
+  const previousStatusRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!state.orderId && !state.orderNumber) return;
 
     let active = true;
     const lookup = state.orderId || state.orderNumber || "";
+    previousStatusRef.current = null;
 
     const loadOrder = () => {
       OrderController.findById(lookup)
         .then((data) => {
-          if (active) setOrder(data);
+          if (!active) return;
+
+          if (!data) {
+            setOrder(null);
+            return;
+          }
+
+          const previousStatus = previousStatusRef.current;
+
+          setOrder(data);
+          previousStatusRef.current = data.status;
+
+          if (previousStatus && previousStatus !== data.status) {
+            void playNotificationSound();
+          }
         })
         .catch(() => {
           if (active) setOrder(null);
